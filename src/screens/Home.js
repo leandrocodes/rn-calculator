@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Text, View, StyleSheet } from 'react-native'
-import Constants from 'expo-constants';
+import Constants from 'expo-constants'
 import Button from '../components/Button'
 import Display from '../components/Display'
 
@@ -15,7 +15,7 @@ const initialState = {
 export default () => {
   const [state, setState] = useState({ ...initialState })
 
-    function addDigit(n) {
+  function addDigit(n) {
     if (n === '.' && state.displayValue.includes('.')) {
       return
     }
@@ -23,26 +23,57 @@ export default () => {
     const clearDisplay = state.displayValue === '0' || state.clearDisplay
 
     const currentValue = clearDisplay ? '' : state.displayValue
-    
+
     const displayValue = currentValue + n
-    
-    setState(prevState => ({...prevState, displayValue, clearDisplay: false}))
-    
+
+    setState((prevState) => ({
+      ...prevState,
+      displayValue,
+      clearDisplay: false
+    }))
+
     if (n !== '.') {
       const newN = parseFloat(displayValue)
       const values = [...state.values]
       values[state.current] = newN
-      setState(prevState => ({ ...prevState, values }))
-      // console.log(state)
+      setState((prevState) => ({ ...prevState, values }))
     }
-    console.log("setout o display:", state)
   }
 
-  function clearMemory () {
+  function clearMemory() {
     setState(initialState)
   }
 
-  function setOperation () {}
+  function setOperation(operation) {
+    if (state.current === 0) {
+      setState((prevState) => ({
+        ...prevState,
+        operation,
+        current: 1,
+        clearDisplay: true
+      }))
+    } else {
+      const equals = operation === '='
+      const values = [...state.values]
+
+      try {
+        values[0] = eval(`${values[0]} ${state.operation} ${values[1]}`)
+      } catch (e) {
+        values[0] = state.values[0]
+      }
+
+      values[1] = 0
+
+      setState((state) => ({
+        ...state,
+        displayValue: values[0],
+        operation: equals ? null : operation,
+        current: equals ? 0 : 1,
+        clearDisplay: !equals,
+        values
+      }))
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -63,7 +94,7 @@ export default () => {
         <Button label='3' onClick={addDigit} />
         <Button label='+' operation onClick={setOperation} />
         <Button label='0' double onClick={addDigit} />
-        <Button label='.' onClick={addDigit}/>
+        <Button label='.' onClick={addDigit} />
         <Button label='=' operation onClick={setOperation} />
       </View>
     </View>
