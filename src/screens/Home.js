@@ -4,22 +4,49 @@ import Constants from 'expo-constants';
 import Button from '../components/Button'
 import Display from '../components/Display'
 
-export default () => {
-  const [displayValue, setDisplayValue] = useState(0)
+const initialState = {
+  displayValue: '0',
+  clearDisplay: false,
+  operation: null,
+  values: [0, 0],
+  current: 0
+}
 
-  function addDigit(n) {
-    setDisplayValue(n)
+export default () => {
+  const [state, setState] = useState({ ...initialState })
+
+    function addDigit(n) {
+    if (n === '.' && state.displayValue.includes('.')) {
+      return
+    }
+
+    const clearDisplay = state.displayValue === '0' || state.clearDisplay
+
+    const currentValue = clearDisplay ? '' : state.displayValue
+    
+    const displayValue = currentValue + n
+    
+    setState(prevState => ({...prevState, displayValue, clearDisplay: false}))
+    
+    if (n !== '.') {
+      const newN = parseFloat(displayValue)
+      const values = [...state.values]
+      values[state.current] = newN
+      setState(prevState => ({ ...prevState, values }))
+      // console.log(state)
+    }
+    console.log("setout o display:", state)
   }
 
   function clearMemory () {
-    setDisplayValue(0)
+    setState(initialState)
   }
 
   function setOperation () {}
 
   return (
     <View style={styles.container}>
-      <Display value={displayValue} />
+      <Display value={state.displayValue} />
       <View style={styles.buttons}>
         <Button label='AC' triple onClick={clearMemory} />
         <Button label='/' operation onClick={setOperation} />
