@@ -16,12 +16,12 @@ export default () => {
   const [state, setState] = useState({ ...initialState })
 
   function addDigit(n) {
-    if (n === '.' && state.displayValue.includes('.')) {
+    const clearDisplay = state.displayValue === '0' || state.clearDisplay
+    
+    if (n === '.' && state.displayValue.includes('.') && !clearDisplay) {
       return
     }
-
-    const clearDisplay = state.displayValue === '0' || state.clearDisplay
-
+    
     const currentValue = clearDisplay ? '' : state.displayValue
 
     const displayValue = currentValue + n
@@ -66,7 +66,7 @@ export default () => {
 
       setState((state) => ({
         ...state,
-        displayValue: values[0],
+        displayValue: `${values[0]}`,
         operation: equals ? null : operation,
         current: equals ? 0 : 1,
         clearDisplay: !equals,
